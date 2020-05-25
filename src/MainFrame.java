@@ -1,64 +1,119 @@
-import java.awt.*;
-
-public class MainFrame {
 
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.geom.Ellipse2D;
+import java.awt.BorderLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 
-    public class BouncingBall implements Runnable {
-
-        // Максимальный радиус, который может иметь мяч
-        private static final int MAX_RADIUS = 40;
-        // Минимальный радиус, который может иметь мяч
-        private static final int MIN_RADIUS = 3;
-        // Максимальная скорость, с которой может летать мяч
-        private static final int MAX_SPEED = 15;
-
-        private Field field;
-        private int radius;
-        private Color color;
-
-        // Текущие координаты мяча
-        private double x;
-        private double y;
-
-        // Вертикальная и горизонтальная компонента скорости
-        private int speed;
-        private double speedX;
-        private double speedY;
-
-        public BouncingBall(Field field) {
+@SuppressWarnings("serial")
+public class MainFrame extends JFrame {
 
 
-            this.field = field;
+    private static final int WIDTH = 700;
+    private static final int HEIGHT = 500;
 
-            radius = new Double(Math.random() * (MAX_RADIUS - MIN_RADIUS)).intValue() + MIN_RADIUS;
+    private JMenuItem pauseMenuItem;
+    private JMenuItem pause2MenuItem;
+    private JMenuItem pause1MenuItem;
+    private JMenuItem resumeMenuItem;
 
-            speed = new Double(Math.round(5 * MAX_SPEED / radius)).intValue();
-            if (speed > MAX_SPEED) {
-                speed = MAX_SPEED;
+
+    private Field field = new Field();
+
+
+    public MainFrame() {
+        super("Программирование и синхронизация потоков");
+        setSize(WIDTH, HEIGHT);
+        Toolkit kit = Toolkit.getDefaultToolkit();
+
+        setLocation((kit.getScreenSize().width - WIDTH)/2, (kit.getScreenSize().height - HEIGHT)/2);
+
+
+
+        JMenuBar menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
+        JMenu ballMenu = new JMenu("Мячи");
+        Action addBallAction = new AbstractAction("Добавить мяч") {
+            public void actionPerformed(ActionEvent event) {
+                field.addBall();
+                if (!pauseMenuItem.isEnabled() && !resumeMenuItem.isEnabled()) {
+                    pauseMenuItem.setEnabled(true);
+                    pause2MenuItem.setEnabled(true);
+                    pause2MenuItem.setEnabled(true);
+                    pause1MenuItem.setEnabled(false);
+                }
             }
+        };
 
-            double angle = Math.random() * 2 * Math.PI;
+        menuBar.add(ballMenu);
+        ballMenu.add(addBallAction);
 
-            speedX = 3 * Math.cos(angle);
-            speedY = 3 * Math.sin(angle);
+        JMenu controlMenu = new JMenu("Управление");
+        menuBar.add(controlMenu);
+        Action pause2Action = new AbstractAction("Приостановить движение мячей малого радиуса"){
+            public void actionPerformed(ActionEvent event) {
+                field.pause();
+                pauseMenuItem.setEnabled(true);
+                pause2MenuItem.setEnabled(false);
+                resumeMenuItem.setEnabled(true);
+                pause1MenuItem.setEnabled(true);
+            }
+        };
 
-            color = new Color((float) Math.random(), (float) Math.random(), (float) Math.random());
+        pause2MenuItem = controlMenu.add(pause2Action);
+        pause2MenuItem.setEnabled(false);
 
-            x = Math.random() * (field.getSize().getWidth() - 2 * radius) + radius;
-            y = Math.random() * (field.getSize().getHeight() - 2 * radius) + radius;
-            Thread thisThread = new Thread(this);
-            thisThread.start();
-        }
+        Action pauseAction = new AbstractAction("Приостановить движение мячей"){
+            public void actionPerformed(ActionEvent event) {
+                field.pause1();
+                pauseMenuItem.setEnabled(false);
+                pause2MenuItem.setEnabled(false);
+                resumeMenuItem.setEnabled(true);
+                pause1MenuItem.setEnabled(true);
+            }
+        };
 
-        public int getRadius() {
-            return radius;
+        pauseMenuItem = controlMenu.add(pauseAction);
+        pauseMenuItem.setEnabled(false);
 
-        }
+        Action resumeAction = new AbstractAction("Возобновить движение мячей") {
+            public void actionPerformed(ActionEvent event) {
+                field.resume();
+                pauseMenuItem.setEnabled(true);
+                pause2MenuItem.setEnabled(true);
+                resumeMenuItem.setEnabled(false);
+                pause1MenuItem.setEnabled(false);
+            }
+        };
 
+        resumeMenuItem = controlMenu.add(resumeAction);
+        resumeMenuItem.setEnabled(false);
+
+        Action pause1Action = new AbstractAction("Возобновить движение мячей малого радиуса"){
+            public void actionPerformed(ActionEvent event) {
+                field.resumeLol();
+                pauseMenuItem.setEnabled(true);
+                pause2MenuItem.setEnabled(true);
+                pause1MenuItem.setEnabled(false);
+                resumeMenuItem.setEnabled(true);
+            }
+        };
+
+        pause1MenuItem = controlMenu.add(pause1Action);
+        pause1MenuItem.setEnabled(false);
+
+
+        getContentPane().add(field, BorderLayout.CENTER);
     }
 
-}
+    public static void main(String[] args) {
+        MainFrame frame = new MainFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+} 
