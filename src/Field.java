@@ -38,7 +38,7 @@ public class Field extends JPanel {
         super.paintComponent(g);
         Graphics2D canvas = (Graphics2D) g;
 
-        for (BouncingBall ball : balls) {
+        for (BouncingBall ball: balls) {
             ball.paint(canvas);
         }
     }
@@ -50,15 +50,47 @@ public class Field extends JPanel {
     }
 
 
-    public void pause() {
+    public  void pause() {
         paused = true;
     }
 
-    public void pause1() {
+    public  void pause1() {
         paused1 = true;
         paused = true;
         resumeLol = false;
 
     }
 
+    public synchronized void resumeLol() {
+        paused = false;
+        resumeLol = true;
+        notifyAll();
+    }
+
+
+    public synchronized void resume() {
+        paused = false;
+        paused1 = false;
+
+        notifyAll();
+    }
+
+
+    public synchronized void canMove(BouncingBall ball) throws
+            InterruptedException {
+
+        if (paused) {
+            if (ball.getRadius() < 10)
+                wait();
+        }
+        if(paused1)
+            if(resumeLol)
+            {
+                if (ball.getRadius() > 10)
+                    wait();
+            }
+            else
+                wait();
+
+    }
 }
